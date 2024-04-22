@@ -57,7 +57,7 @@ namespace dummy_CRUD.Pages.clients
 
             var host = secret.Data.Data["host"].ToString();
             var user = secret.Data.Data["user"].ToString();
-            var pass = secret.Data.Data["pass"].ToString();
+            var pass = secret.Data.Data["pass"].ToString(); //hi
 
 
             return host + user + pass ;
