@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>dummy_CRUD</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="HashiCorp.Vault" Version="0.3.0" />
+    <PackageReference Include="VaultSharp" Version="1.13.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Pages\clients\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Pages\clients\" />
+  </ItemGroup>
+</Project>
