@@ -16,8 +16,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Pages\clients\" />
+    <None Remove="Pages\PertaminaVault\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\clients\" />
+    <Folder Include="Pages\PertaminaVault\" />
   </ItemGroup>
 </Project>

@@ -1,66 +1,81 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using VaultSharp;
-using VaultSharp.V1.AuthMethods;
-using VaultSharp.V1.AuthMethods.AppRole;
-using VaultSharp.V1.AuthMethods.Token;
-using VaultSharp.V1.Commons;
+using dummy_CRUD.Pages.PertaminaVault;
+using Microsoft.Extensions.Configuration;
+//using WebService.Database;
+
 
 namespace dummy_CRUD.Pages.clients
 {
-	public class VaultSecretModel : PageModel
+    public class VaultSecretModel : PageModel
     {
         public string SecretValue { get; private set; }
-        public IActionResult OnGet()
+        public string HostValue { get; private set; }
+        public string ApiKey { get; private set; }
+        public string DynamicSecret { get; private set; }
+        
 
+        public IActionResult OnGet()
         {
+
+            var MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            var VaultAddress = MyConfig.GetValue<string>("Vault:Address");
+            var AppRoleAuthRoleId = MyConfig.GetValue<string>("Vault:RoleId");
+            var AppRoleAuthSecretId = MyConfig.GetValue<string>("Vault:SecretId");
+
+            
+
+            //var VaultAddress = "http://localhost:8200";
+            //var AppRoleAuthRoleId = "3fcb6c85-29d7-9ef5-81c7-1421afd5898e";
+            //var AppRoleAuthSecretId = "ed89630d-922a-6aa6-fca9-f2f07a604104";
+            Console.WriteLine(VaultAddress + AppRoleAuthRoleId + AppRoleAuthSecretId);
             try
             {
-                string vaultAddress = "http://localhost:8200";
-                string roleId = "3fcb6c85-29d7-9ef5-81c7-1421afd5898e";
-                string secretId = "ed89630d-922a-6aa6-fca9-f2f07a604104";
-                string secretPath = "AZURE_KEY"; // Replace with your actual secret path
-                string keyValue = "";
+                VaultWrapper vault = new VaultWrapper(
+                new vaultSettingspertamina
+                    {
+                    Address = VaultAddress,
+                    AppRoleAuthRoleId = AppRoleAuthRoleId,
+                    AppRoleAuthSecretId = AppRoleAuthSecretId
+                    }
+                );
 
-                IVaultClient vaultClient = CreateVaultClient(vaultAddress, roleId, secretId);
-                SecretValue = GetSecretFromVault(vaultClient, secretPath);
+                SecretValue = vault.GetSecretApiKey(path: "AZURE_KEY", KeyField: "pass");
+                HostValue = vault.GetSecretApiKey(path: "AZURE_KEY", KeyField: "host");
+                ApiKey = vault.GetSecretApiKey(path: "AZURE_KEY", KeyField: "api_key");
 
+                //example retrive dynamic credentials
+                var DatabaseUsername = vault.GetDatabaseCredentials(DatabaseCredentialsRole: "library_owner");
+                var Username = DatabaseUsername.Username;
+                var Password = DatabaseUsername.Password;
+
+
+                //UsernamePasswordCredentials credentials = vault.GetDatabaseCredentials(DatabaseCredentialsRole: "library_owner");
+
+
+
+
+                //Console.WriteLine(DatabaseUsername);
+                Console.WriteLine("Myusername is = " + Username + "\n Mypassword is = " + Password);
                 return Page();
+
+
+
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error: {ex.Message}";
+                Console.WriteLine("Execption: " + ex.ToString());
                 return RedirectToPage("/Error"); // Redirect to an error page
             }
-        }
-        private IVaultClient CreateVaultClient(string vaultAddress, string roleId, string secretId)
-        {
-  
-  
-            IAuthMethodInfo authMethod = new AppRoleAuthMethodInfo(roleId, secretId.ToString());
-            var vaultClientSettings = new VaultClientSettings(vaultAddress, authMethod);
 
-
-            IVaultClient vaultClient = new VaultClient(vaultClientSettings);
-
-            return vaultClient;
-        }
-
-        private string GetSecretFromVault(IVaultClient vaultClient, string path)
-        {
-            Secret<SecretData> secret = vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: path).Result;
-
-            var host = secret.Data.Data["host"].ToString();
-            var user = secret.Data.Data["user"].ToString();
-            var pass = secret.Data.Data["pass"].ToString(); //hi
-
-
-            return host + user + pass ;
         }
     }
 }
+

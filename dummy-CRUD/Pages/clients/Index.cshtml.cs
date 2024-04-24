@@ -13,14 +13,18 @@ using VaultSharp.V1.AuthMethods.AppRole;
 using VaultSharp.V1.AuthMethods.Token;
 using VaultSharp.V1.Commons;
 using System.Diagnostics;
+using dummy_CRUD.Pages.PertaminaVault;
 
 namespace dummy_CRUD.Pages.clients
 {
 	public class IndexModel : PageModel
     {
+        //private readonly VaultPertamina vaultPertamina;
         public List<ClientInfo> ListClients = new List<ClientInfo>();
-        public void OnGet()
+        private readonly VaultWrapper _vault; 
+        public void OnGet() 
         {
+          
             try
             {
                 //String connectionString = "Data Source=ServerName;Initial Catalog=library;Integrated Security=False;User Id=sa;dockerStrongPwd123=;MultipleActiveResultSets=True" />
@@ -50,6 +54,7 @@ namespace dummy_CRUD.Pages.clients
                     }
                     connection.Close();
 
+
                 }
              }
             catch (Exception ex)
@@ -57,35 +62,35 @@ namespace dummy_CRUD.Pages.clients
                 Console.WriteLine("Execption: " + ex.ToString()); 
             }
 
-            try
-            {
-                var vaultAddr = "http://localhost:8200";
-                var roleId = "3fcb6c85-29d7-9ef5-81c7-1421afd5898e";
-                var secretId = "ed89630d-922a-6aa6-fca9-f2f07a604104";
+            //try
+            //{
+            //    var vaultAddr = "http://localhost:8200";
+            //    var roleId = "3fcb6c85-29d7-9ef5-81c7-1421afd5898e";
+            //    var secretId = "ed89630d-922a-6aa6-fca9-f2f07a604104";
 
-                IAuthMethodInfo authMethod = new AppRoleAuthMethodInfo(roleId, secretId.ToString());
-                var vaultClientSettings = new VaultClientSettings(vaultAddr, authMethod);
+            //    IAuthMethodInfo authMethod = new AppRoleAuthMethodInfo(roleId, secretId.ToString());
+            //    var vaultClientSettings = new VaultClientSettings(vaultAddr, authMethod);
 
-                IVaultClient vaultClient = new VaultClient(vaultClientSettings);
+            //    IVaultClient vaultClient = new VaultClient(vaultClientSettings);
 
 
-                Secret<SecretData> kv2Secret = null;
-                kv2Secret = vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: "AZURE_KEY").Result;
+            //    Secret<SecretData> kv2Secret = null;
+            //    kv2Secret = vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: "AZURE_KEY").Result;
 
-                
-                var host = kv2Secret.Data.Data["host"];
-                var passAzure = kv2Secret.Data.Data["pass"];
-                var userAzure = kv2Secret.Data.Data["user"];
 
-                Console.WriteLine(host + "\n" + passAzure + "\n" + userAzure);
-            }
-            catch (AggregateException ex)
-            {
-                foreach (var errInner in ex.InnerExceptions)
-                {
-                    Debug.WriteLine(errInner); //this will call ToString() on the inner execption and get you message, stacktrace and you could perhaps drill down further into the inner exception of it if necessary 
-                }
-            }
+            //    var host = kv2Secret.Data.Data["host"];
+            //    var passAzure = kv2Secret.Data.Data["pass"];
+            //    var userAzure = kv2Secret.Data.Data["user"];
+
+            //    Console.WriteLine(host + "\n" + passAzure + "\n" + userAzure);
+            //}
+            //catch (AggregateException ex)
+            //{
+            //    foreach (var errInner in ex.InnerExceptions)
+            //    {
+            //        Debug.WriteLine(errInner); //this will call ToString() on the inner execption and get you message, stacktrace and you could perhaps drill down further into the inner exception of it if necessary 
+            //    }
+            //}
 
         }
     }
@@ -153,4 +158,5 @@ namespace dummy_CRUD.Pages.clients
         public string created_at;
 
     }
+ 
 }
