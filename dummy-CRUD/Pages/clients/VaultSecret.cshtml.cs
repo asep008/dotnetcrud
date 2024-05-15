@@ -54,7 +54,7 @@ namespace dummy_CRUD.Pages.clients
                 var DatabaseUsername = vault.GetDatabaseCredentials(DatabaseCredentialsRole: "library_owner");
                 var Username = DatabaseUsername.Username;
                 var Password = DatabaseUsername.Password;
-
+                //var lease_id = DatabaseUsername.lease_id;
 
                 //UsernamePasswordCredentials credentials = vault.GetDatabaseCredentials(DatabaseCredentialsRole: "library_owner");
 

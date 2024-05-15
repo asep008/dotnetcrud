@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Logging;
-//using Vault;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods.AppRole;
 using VaultSharp.V1.AuthMethods.Token;
@@ -48,15 +47,6 @@ namespace dummy_CRUD.Pages.PertaminaVault
 
         public string GetSecretApiKey(string path, string KeyField)
         {
-            //_logger.LogInformation("getting secret api key from vault: started");
-
-            //Secret<SecretData> secret = _client.V1.Secrets.KeyValue.V2.ReadSecretAsync(
-            //    // vault path within kv-v2/ (e.g. "api-key", not "kv-v2/api-key")
-            //    path: _settings.ApiKeyPath
-            //).Result;
-
-       
-            //_logger.LogInformation("getting secret api key from vault: done");
             Secret<SecretData> secret = _client.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: path).Result;
             string apiKey = secret.Data.Data[KeyField].ToString();
 
@@ -65,15 +55,12 @@ namespace dummy_CRUD.Pages.PertaminaVault
 
         public UsernamePasswordCredentials GetDatabaseCredentials(string DatabaseCredentialsRole)
         {
-            //    _logger.LogInformation("getting temporary database credentials from vault: started");
 
             Secret<UsernamePasswordCredentials> dynamicDatabaseCredentials = _client.V1.Secrets.Database.GetCredentialsAsync(
-                // vault path within database/roles/ (e.g. "dev-readonly", not "database/roles/dev-readonly")
                 roleName: DatabaseCredentialsRole
             ).Result;
 
-            //_logger.LogInformation("getting temporary database credentials from vault: done");
-
+         
             return dynamicDatabaseCredentials.Data;
         }
 

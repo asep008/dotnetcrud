@@ -14,6 +14,7 @@ using VaultSharp.V1.AuthMethods.Token;
 using VaultSharp.V1.Commons;
 using System.Diagnostics;
 using dummy_CRUD.Pages.PertaminaVault;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace dummy_CRUD.Pages.clients
 {
@@ -24,11 +25,39 @@ namespace dummy_CRUD.Pages.clients
         private readonly VaultWrapper _vault; 
         public void OnGet() 
         {
-          
+
+            var MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            var VaultAddress = MyConfig.GetValue<string>("Vault:Address");
+            var AppRoleAuthRoleId = MyConfig.GetValue<string>("Vault:RoleId");
+            var AppRoleAuthSecretId = MyConfig.GetValue<string>("Vault:SecretId");
             try
             {
-                //String connectionString = "Data Source=ServerName;Initial Catalog=library;Integrated Security=False;User Id=sa;dockerStrongPwd123=;MultipleActiveResultSets=True" />
-                String connectionString = "Server=localhost;Initial Catalog=library;Integrated Security=False;User Id=sa;Password=dockerStrongPwd123;MultipleActiveResultSets=True";
+                //get credentials from VAULT
+                VaultWrapper vault = new VaultWrapper(
+                    new vaultSettingspertamina
+                    {
+                        Address = VaultAddress,
+                        AppRoleAuthRoleId = AppRoleAuthRoleId,
+                        AppRoleAuthSecretId = AppRoleAuthSecretId
+                    }
+                    );
+
+
+
+                //example retrive dynamic credentials
+                var DatabaseUsername = vault.GetDatabaseCredentials(DatabaseCredentialsRole: "library_owner");
+                var Username = DatabaseUsername.Username;
+                var Password = DatabaseUsername.Password;
+
+                Console.WriteLine("My current Username From vault = \n" + Username + "My current Password from vault = " + Password);
+       
+                String connectionString = $"Server=localhost;" +
+                    $"Initial Catalog=library;" +
+                    $"Integrated Security=False;" +
+                    $"User Id={Username};" +
+                    $"Password={Password};" +
+                    $"MultipleActiveResultSets=True";
+
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
