@@ -1,80 +1,97 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using dummy_CRUD.Models;
 
 namespace dummy_CRUD.Pages.clients
 {
-	public class EditModel : PageModel
+    public class EditModel : PageModel
     {
+        private readonly VaultService _vaultService;
         public ClientInfo clientInfo = new ClientInfo();
-        public String errorMessage = "";
-        public String successMessage = "";
-        public void OnGet()
+        public string errorMessage = "";
+        public string successMessage = "";
+
+        public EditModel(VaultService vaultService)
         {
-            String id = Request.Query["id"];
-            Console.WriteLine(id);
-            
+            _vaultService = vaultService;
+        }
+        public async Task OnGet()
+        {
             try
             {
-                String connectionString = "Server=localhost;Initial Catalog=library;Integrated Security=False;User Id=sa;Password=dockerStrongPwd123;MultipleActiveResultSets=True";
+                // Ensure id is treated as an integer
+                int id = Convert.ToInt32(Request.Query["id"]);
+
+                string dbHost = await _vaultService.GetSecret("host");
+                string dbUser = await _vaultService.GetSecret("user");
+                string dbPassword = await _vaultService.GetSecret("pass");
+
+                string connectionString = $"Server={dbHost};Initial Catalog=library;User Id={dbUser};Password={dbPassword};MultipleActiveResultSets=True";
+
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-                    String sql = "select * from clients where id=@id";
+                    string sql = "SELECT * FROM clients WHERE id=@id";
+
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@id", id);
+
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             if (reader.Read())
                             {
-                                clientInfo.id = "" + reader.GetInt32(0);
+                                clientInfo.id = reader.GetInt32(0);  // ID should be an integer
                                 clientInfo.name = reader.GetString(1);
                                 clientInfo.email = reader.GetString(2);
                                 clientInfo.phone = reader.GetString(3);
                                 clientInfo.address = reader.GetString(4);
- 
-
+                                clientInfo.created_at = reader.GetDateTime(5);
                             }
                         }
                     }
                     connection.Close();
                 }
-
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
-                return;
             }
         }
-        public void OnPost()
+
+        public async Task OnPost()
         {
-            clientInfo.id = Request.Form["id"];
-            clientInfo.name = Request.Form["name"];
-            clientInfo.email = Request.Form["email"];
-            clientInfo.phone = Request.Form["phone"];
-            clientInfo.address = Request.Form["address"];
-
-            if (clientInfo.name.Length == 0 || clientInfo.email.Length == 0 || clientInfo.phone.Length == 0 || clientInfo.address.Length == 0)
-            {
-                errorMessage = "All the field are required";
-                return;
-            }
-
             try
             {
-                String connectionString = "Server=localhost;Initial Catalog=library;Integrated Security=False;User Id=sa;Password=dockerStrongPwd123;MultipleActiveResultSets=True";
+                // Ensure id is parsed as an integer from the form
+                clientInfo.id = Convert.ToInt32(Request.Form["id"]);
+                clientInfo.name = Request.Form["name"];
+                clientInfo.email = Request.Form["email"];
+                clientInfo.phone = Request.Form["phone"];
+                clientInfo.address = Request.Form["address"];
+
+                if (string.IsNullOrEmpty(clientInfo.name) ||
+                    string.IsNullOrEmpty(clientInfo.email) ||
+                    string.IsNullOrEmpty(clientInfo.phone) ||
+                    string.IsNullOrEmpty(clientInfo.address))
+                {
+                    errorMessage = "All fields are required";
+                    return;
+                }
+
+                string dbHost = await _vaultService.GetSecret("host");
+                string dbUser = await _vaultService.GetSecret("user");
+                string dbPassword = await _vaultService.GetSecret("pass");
+
+                string connectionString = $"Server={dbHost};Initial Catalog=library;User Id={dbUser};Password={dbPassword};MultipleActiveResultSets=True";
+
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-                    String sql = "UPDATE clients " +
-                                 "SET name=@name, email=@email, phone=@phone, address=@address " +
-                                 "WHERE id=@id";
+                    string sql = "UPDATE clients SET name=@name, email=@email, phone=@phone, address=@address WHERE id=@id";
+
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@name", clientInfo.name);
@@ -88,14 +105,13 @@ namespace dummy_CRUD.Pages.clients
                     connection.Close();
                 }
 
+                successMessage = "Client updated successfully";
+                Response.Redirect("/clients/Index");
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
-                return;
             }
-
-            Response.Redirect("/clients/Index");
         }
     }
 }

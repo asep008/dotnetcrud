@@ -1,11 +1,17 @@
 ﻿@page
 @using System.Data.SqlClient;
+@inject VaultService _vaultService;
 @{
     try
     {
         String id = Request.Query["id"];
+        
+        @* String connectionString = "Server=172.16.74.227;Initial Catalog=library;Integrated Security=False;User Id=sa;Password=Password123!;MultipleActiveResultSets=True"; *@
+        string dbHost = await _vaultService.GetSecret("host");
+        string dbUser = await _vaultService.GetSecret("user");
+        string dbPassword = await _vaultService.GetSecret("pass");
 
-        String connectionString = "Server=localhost;Initial Catalog=library;Integrated Security=False;User Id=sa;Password=dockerStrongPwd123;MultipleActiveResultSets=True";
+        string connectionString = $"Server={dbHost};Initial Catalog=library;User Id={dbUser};Password={dbPassword};MultipleActiveResultSets=True";
         using (SqlConnection connection = new SqlConnection(connectionString))
         {
             connection.Open();

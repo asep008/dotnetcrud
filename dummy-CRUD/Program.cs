@@ -2,6 +2,7 @@
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddSingleton<VaultService>();
 
 var app = builder.Build();
 

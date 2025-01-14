@@ -22,8 +22,8 @@ namespace dummy_CRUD.Pages.clients
             try
             {
                 string vaultAddress = "http://localhost:8200";
-                string roleId = "3fcb6c85-29d7-9ef5-81c7-1421afd5898e";
-                string secretId = "ed89630d-922a-6aa6-fca9-f2f07a604104";
+                string roleId = "ad1aae5d-355b-8cff-d291-ccd1b7ad648f";
+                string secretId = "6f485157-6a61-703e-6485-acb3ef343f67";
                 string secretPath = "AZURE_KEY"; // Replace with your actual secret path
                 string keyValue = "";
 

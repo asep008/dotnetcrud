@@ -5,19 +5,25 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using dummy_CRUD.Models;
 
 namespace dummy_CRUD.Pages.clients
 {
 	public class CreateModel : PageModel
     {
+        private readonly VaultService _vaultService;
         public ClientInfo clientInfo = new ClientInfo();
         public String errorMessage = "";
         public String successMessage = "";
+        public CreateModel(VaultService vaultService)
+        {
+            _vaultService = vaultService;
+        }
         public void OnGet()
         {
         }
 
-        public void OnPost()
+        public async Task OnPost()
         {
             clientInfo.name = Request.Form["name"];
             clientInfo.email = Request.Form["email"];
@@ -32,7 +38,12 @@ namespace dummy_CRUD.Pages.clients
             // save the new client to DB
             try
             {
-                String connectionString = "Server=localhost;Initial Catalog=library;Integrated Security=False;User Id=sa;Password=dockerStrongPwd123;MultipleActiveResultSets=True";
+                string dbHost = await _vaultService.GetSecret("host");
+                string dbUser = await _vaultService.GetSecret("user");
+                string dbPassword = await _vaultService.GetSecret("pass");
+
+                string connectionString = $"Server={dbHost};Initial Catalog=library;User Id={dbUser};Password={dbPassword};MultipleActiveResultSets=True";
+
                 using (SqlConnection connection = new SqlConnection(connectionString)) {
                     connection.Open();
                     String sql = "insert into clients " +
@@ -58,6 +69,7 @@ namespace dummy_CRUD.Pages.clients
 
             clientInfo.name = ""; clientInfo.email = ""; clientInfo.phone = ""; clientInfo.address = "";
             successMessage = "New client Added correctly";
+            Response.Redirect("/clients/Index");
 
         }
 
