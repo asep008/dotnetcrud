@@ -20,8 +20,8 @@ public class VaultService
         var vaultConfig = configuration.GetSection("Vault");
         
         _vaultAddress = vaultConfig["Address"];
-        _roleId = vaultConfig["RoleId"];
-        _secretId = vaultConfig["SecretId"];
+        _roleId = Environment.GetEnvironmentVariable("VAULT_ROLE_ID") ?? throw new Exception("VAULT_ROLE_ID environment variable is not set.");
+        _secretId = Environment.GetEnvironmentVariable("VAULT_SECRET_ID") ?? throw new Exception("VAULT_SECRET_ID environment variable is not set.");
         _apiKeyPath = vaultConfig["ApiKeyPath"];
         _apiKeyField = vaultConfig["ApiKeyField"];
 

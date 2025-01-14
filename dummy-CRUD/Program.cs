@@ -2,6 +2,17 @@
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+// builder.Services.AddRazorPages().AddRazorPagesOptions(options =>
+// {
+//     options.Conventions.AddFolderRouteModelConvention("/", model =>
+//     {
+//         foreach (var selector in model.Selectors)
+//         {
+//             selector.AttributeRouteModel.Template =
+//                 "test/" + selector.AttributeRouteModel.Template;
+//         }
+//     });
+// });;
 builder.Services.AddSingleton<VaultService>();
 
 var app = builder.Build();

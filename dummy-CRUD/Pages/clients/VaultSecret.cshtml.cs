@@ -15,17 +15,25 @@ namespace dummy_CRUD.Pages.clients
 {
 	public class VaultSecretModel : PageModel
     {
+        private readonly IConfiguration _configuration;
         public string SecretValue { get; private set; }
-        public IActionResult OnGet()
+        public string ErrorMessage { get; private set; }
 
+        public VaultSecretModel(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+        public async Task<IActionResult> OnGetAsync()
         {
             try
             {
-                string vaultAddress = "http://localhost:8200";
-                string roleId = "ad1aae5d-355b-8cff-d291-ccd1b7ad648f";
-                string secretId = "6f485157-6a61-703e-6485-acb3ef343f67";
-                string secretPath = "AZURE_KEY"; // Replace with your actual secret path
-                string keyValue = "";
+                var vaultConfig = _configuration.GetSection("Vault");
+
+                string vaultAddress = vaultConfig["Address"];
+                string roleId = Environment.GetEnvironmentVariable("VAULT_ROLE_ID") ?? throw new Exception("VAULT_ROLE_ID environment variable is not set.");
+                string secretId = Environment.GetEnvironmentVariable("VAULT_SECRET_ID") ?? throw new Exception("VAULT_SECRET_ID environment variable is not set.");
+                string secretPath = vaultConfig["ApiKeyPath"];
+                string keyValue = vaultConfig["ApiKeyField"];
 
                 IVaultClient vaultClient = CreateVaultClient(vaultAddress, roleId, secretId);
                 SecretValue = GetSecretFromVault(vaultClient, secretPath);
@@ -60,7 +68,7 @@ namespace dummy_CRUD.Pages.clients
             var pass = secret.Data.Data["pass"].ToString(); //hi
 
 
-            return host + user + pass ;
+            return host + " - " + user + " - " + pass;
         }
     }
 }
